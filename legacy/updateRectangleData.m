@@ -1,4 +1,17 @@
 function updateRectangleData(editedRect, label, score)
+
+% updateRectangleData: updates the currentEdit data for bounding boxes
+% currently being edited
+%
+% This script is called by an event listener which is activated whenever a
+% user begins to edit an existing bounding box. The use of an event
+% listener is misleading, because this only runs once before shutting
+% itself off (and it might as well be called when the rectngle is first
+% edited). 
+%
+% The functionality of this script (populating the fields of currentEdit)
+% is duplicated within finalizeEditMode, so this script is obsolete.
+
     global REMORA PARAMS HANDLES
 
     % Get the final position of the interactive rectangle
@@ -18,6 +31,7 @@ function updateRectangleData(editedRect, label, score)
     REMORA.lt.lVis_det.currentEdit.max_freq = maxFreq;
     REMORA.lt.lVis_det.currentEdit.label = label;
     REMORA.lt.lVis_det.currentEdit.score = score;
-    
+
     set(HANDLES.fig.main, 'WindowButtonUpFcn', '');
+
 end

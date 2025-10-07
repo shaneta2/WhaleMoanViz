@@ -1,50 +1,48 @@
 function [prevDet,nextDet] = lt_lVis_envDet_rf()
 
-global REMORA PARAMS HANDLES
-next = [];
-prev = [];
+% lt_lVis_envDet: finds the nearest detections not shown in the current window, 
+% one before and one after.
+%
+% This function is called by "motion.m" in the base Triton package as a
+% helper function to move the plot window the previous or next detection.
+% It returns the closest detection before the window (prevDet) and after
+% the window (nextDet).
+% 
+% The naming for this function is legacy from another Remora, since the 
+% base Triton package looks for a function with this name specifically.
 
-% detection groups
-labels = {'', '2', '3', '4', '5', '6', '7', '8'};
-
-%create start and end times of window
-startWV = PARAMS.plot.dnum;
-if isfield(HANDLES.subplt,'specgram')
-    winLength = HANDLES.subplt.specgram.XLim(2); %get length of window in seconds, used to compute end limit
-elseif isfield(HANDLES.subplt,'timeseries')
-    winLength = HANDLES.subplt.timeseries.XLim(2);
-else
-    disp('WARNING: cannot jump to next/previous rf detection. Please plot either spectrogram, timeseries, or both to use this function')
-end
-endWV = startWV + datenum(0,0,0,0,0,winLength);
-
-
-for iDets = 1:length(labels)
-    detId = sprintf('detection%s', labels{iDets});
-    if isfield(REMORA.lt.lVis_det.(detId),'starts')
-        labs = REMORA.lt.lVis_det.(detId).starts;
-        next{iDets} = labs(find(labs>endWV,1));
-        prev{iDets} = labs(find(labs<startWV,1,'last'));
-    end
-end
-
-next = [next{:}];
-prev = [prev{:}];
-
-%truncate detections to this LTSA file- just keeps things from messing up 
-next = next(next<=PARAMS.raw.dnumEnd(end));
-prev = prev(prev>=PARAMS.raw.dnumStart(1));
-
-if ~isempty(next)
-    next_sort = sort(next);
-    nextDet = next_sort(1);
-else
-    nextDet = [];
-end
-
-if ~isempty(prev)
-    prev_sort = sort(prev);
-    prevDet = prev_sort(end);
-else
+    global REMORA PARAMS HANDLES
+    
     prevDet = [];
+    nextDet = [];
+    
+    % create start and end times of window
+    startWV = PARAMS.plot.dnum;
+    if isfield(HANDLES.subplt,'specgram')
+        winLength = HANDLES.subplt.specgram.XLim(2);
+    elseif isfield(HANDLES.subplt,'timeseries')
+        winLength = HANDLES.subplt.timeseries.XLim(2);
+    else
+        disp('Error: cannot jump to next/previous rf detection. Please plot either spectrogram, timeseries, or both to use this function')
+        return
+    end
+    endWV = startWV + datenum(0,0,0,0,0,winLength);
+    
+    % finds the nearest detections
+    if isfield(REMORA.lt.lVis_det.detection,'starts')
+        labs = REMORA.lt.lVis_det.detection.starts;
+        next = labs(find(labs>endWV,1));
+        prev = labs(find(labs<startWV,1,'last'));
+    end
+    
+    % check if previous / next detection exists, and exclude detections 
+    % outside of current LTSA file  
+    if ~isempty(next) && next<=PARAMS.raw.dnumEnd(end)
+        nextDet = next;
+    end
+    
+    if ~isempty(prev) && prev>=PARAMS.raw.dnumStart(1)
+        prevDet = prev;
+    end
+
 end

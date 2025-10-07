@@ -1,5 +1,14 @@
 function addDetection(~, ~)
-    global REMORA HANDLES PARAMS
+
+% addDetection: handles the creation of new bounding boxes
+%
+% This script is called whenever the user wants to add a new bounding box.
+% It creates a temporary rectangle (REMORA.tempRect) which the user can
+% resize with their mouse. As soon as the user releases the click button,
+% the box is funalized.
+% Created by Michaela Alksne and Shane Andres
+
+    global REMORA HANDLES
 
     % Get the initial click position
     cursorPoint = get(HANDLES.subplt.specgram, 'CurrentPoint');
@@ -14,31 +23,6 @@ function addDetection(~, ~)
     set(HANDLES.fig.main, 'WindowButtonMotionFcn', @(~, ~) updateRectangleSize(x0, y0));
 
     % Set up a function to finalize the box when the mouse button is released
-    set(HANDLES.fig.main, 'WindowButtonUpFcn', @(~, ~) finalizeBoundingBox());
-end
-
-function updateRectangleSize(x0, y0)
-    global REMORA HANDLES
-
-    % Get current cursor position
-    cursorPoint = get(HANDLES.subplt.specgram, 'CurrentPoint');
-    x1 = cursorPoint(1,1);
-    y1 = cursorPoint(1,2);
-
-    % Calculate new width and height
-    width = x1 - x0;
-    height = y1 - y0;
-
-    % Ensure non-negative width and height
-    if width < 0
-        x0 = x1;
-        width = abs(width);
-    end
-    if height < 0
-        y0 = y1;
-        height = abs(height);
-    end
-
-    % Update the rectangle's position
-    REMORA.tempRect.Position = [x0, y0, width, height];
+    set(HANDLES.fig.main, 'WindowButtonUpFcn', @(~, ~) finalizeAddDetectionMode());
+    
 end

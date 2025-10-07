@@ -14,6 +14,6 @@ function detectRightClick(~, ~)
 
         % Set up drag and release functions
         set(HANDLES.fig.main, 'WindowButtonMotionFcn', @drawBoundingBox);
-        set(HANDLES.fig.main, 'WindowButtonUpFcn', @finalizeBoundingBox);
+        set(HANDLES.fig.main, 'WindowButtonUpFcn', @finalizeAddDetectionMode);
     end
 end

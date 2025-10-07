@@ -1,38 +1,50 @@
 function editBoundingBox(src, detectionIdx, startX, endX, minY, maxY, label, score, color)
+
+% editBoundingBox: handles the creation of an interactive bounding box
+% whenever a detection is clicked on in the spectrogram
+%
+% This script is called by an event listener which is set up for every
+% bounding box plotted in the spectrogram. When a rectange is clicked, an
+% interactive bounding box is created. Event listeners are set up to allow
+% for the finalizing of the bounding box (on key press).
+% Created by Michaela Alksne and Shane Andres
+
     global REMORA HANDLES
-    
-    % Initialize edited_labels if it doesn't exist
-    if ~isfield(REMORA.lt.lVis_det.detection, 'edited_labels') || isempty(REMORA.lt.lVis_det.detection.edited_labels)
-        REMORA.lt.lVis_det.detection.edited_labels = {};  % Initialize as an empty cell array
+
+    % if another box is already being edited, do not enter edit mode
+    if ~( isa(REMORA.lt.lVis_det.currentEdit, 'double') && isempty(REMORA.lt.lVis_det.currentEdit) )
+        return
     end
 
-    % Enter edit mode by turning the selected rectangle into an interactive drawrectangle
+    % enter edit mode by turning the selected rectangle into an interactive drawrectangle
     src.Visible = 'off';  % Hide original rectangle temporarily
 
-    % Create an interactive rectangle in place of the original
+    % get proper right click menu for detection type
+    clickMenu = wmvClickMenu('GetMenu', detectionIdx);
+
+    % create an interactive rectangle in place of the original
     editedRect = drawrectangle('Position', [startX, minY, endX - startX, maxY - minY], ...
                                'Color', 'cyan', 'LineWidth', 2);
+    editedRect.UIContextMenu = clickMenu;
     disp('Interactive bounding box created.');
 
-    % Save the initial rectangle properties in currentEdit
+    % save the initial rectangle properties in currentEdit
     REMORA.lt.lVis_det.currentEdit = struct( ...
         'originalRect', src, ...
-        'editedRect', editedRect, ...  % Store edited rectangle handle
+        'editedRect', editedRect, ...  % store edited rectangle handle
         'start_datenum', startX, ...
         'end_datenum', endX, ...
         'min_freq', minY, ...
         'max_freq', maxY, ...
         'label', label, ...
         'score', score, ...
-        'detectionIdx', detectionIdx ...  % Store index directly
+        'detectionIdx', detectionIdx ...  % store index directly
     );
 
-    % Set up the KeyPressFcn to finalize with Enter key or Delete with Delete key
+    % set up the KeyPressFcn to finalize with Enter key or Delete with Delete key
     set(HANDLES.fig.main, 'WindowKeyPressFcn', @(~, event) finalizeEditMode(event));    
 
-    % Set up a listener for when the rectangle adjustment is completed
-    set(HANDLES.fig.main, 'WindowButtonUpFcn', @(~, ~) updateRectangleData(editedRect, label, score));
-    
-    % Remove the key press and mouse up listeners to prevent unintended triggers
-  
+    % set up ButtonDownFcn to cancel edit if user clicks outside box
+    set(HANDLES.plt.specgram, 'HitTest', 'off', 'PickableParts', 'none');
+    set(HANDLES.subplt.specgram, 'ButtonDownFcn', @(~, event) finalizeEditMode(event));
 end

@@ -1,5 +1,19 @@
 
 function initializeDetectionFields(data)
+
+% initializeDetectionFields: Populates the "detection" data structure
+% (used when plotting bounding boxes)
+%
+% The information for each detected / added bounding box audio is stored in 
+% a dataTable which is updated whenever a bounding box is modified.
+% The "detection" data structure stores a copy of this
+% information, which is used for plotting each bounding box, and 
+% it must be updated whenever the dataTable is. This script is used to 
+% populate the "detection" data structure.
+% 
+% Note that the dataTable is passed in as an argument.
+% Created by Michaela Alksne
+
     global REMORA
 
      % Sort data by start_time
@@ -14,4 +28,5 @@ function initializeDetectionFields(data)
     REMORA.lt.lVis_det.detection.max_freq = data.max_frequency;
     REMORA.lt.lVis_det.detection.score = data.score;
     REMORA.lt.lVis_det.detection.pr = data.pr;
+    
 end

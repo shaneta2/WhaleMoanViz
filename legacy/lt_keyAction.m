@@ -1,5 +1,11 @@
 function lt_keyAction(varargin)
 
+% lt_keyAction: Event handler for button presses in Remora window
+%
+% This script handles button presses while using the Remora.
+% This has been replaces with dynamically added / removed event listeners
+% and is now obselete.
+
 global REMORA
 
 REMORA.lt.lVis_det.cc = get(gcf,'CurrentCharacter');
